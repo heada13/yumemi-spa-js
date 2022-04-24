@@ -1,73 +1,92 @@
 <template>
-  <div class="container">
-    <div>
-      <Logo />
-      <h1 class="title">
-        yumemi-spa
-      </h1>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--grey"
-        >
-          GitHub
-        </a>
+  <div>
+    {{ data.prefectures }}
+    {{ data.population }}
+    <figure class="highcharts-figure"><div id="container"></div></figure>
+    <div class="checkbox-container">
+      <div
+        class="checkbox-item"
+        v-for="(pref, index) in data.prefectures"
+        :key="index"
+      >
+        <input
+          type="checkbox"
+          v-model="data.prefcode"
+          :name="pref.prefCode"
+          :value="pref.prefCode"
+          @change="getCheckedPopulation"
+        />
+        <label>{{ pref.prefName }}</label>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-export default {}
+import {
+  defineComponent,
+  onMounted,
+  reactive,
+  useContext,
+} from "@nuxtjs/composition-api";
+
+export default defineComponent({
+  setup() {
+    onMounted(() => {
+      getPrefectures();
+    });
+
+    // const { $config } = useContext();
+    const { $axios, $config } = useContext();
+
+    const data = reactive({
+      prefectures: [],
+      prefcode: [],
+      population: [],
+    });
+
+    const baseURL = $config.baseURL;
+    const headers = {
+      "Content-Type": "application/json",
+      "X-API-KEY": $config.apiKey,
+    };
+
+    const getCheckedPopulation = () => {
+      let p = data.prefcode;
+      let tmpdata = [];
+      for (let i in p) {
+        getPopulation(p[i]).then((result) => {
+          tmpdata.push(result);
+        });
+      }
+      data.population = tmpdata;
+    };
+
+    const getPopulation = async (code) => {
+      const populationUrl = `${baseURL}api/v1/population/composition/perYear?cityCode=-&prefCode=${code}`;
+      const res = await $axios.$get(populationUrl, { headers: headers });
+      return res;
+    };
+
+    const getPrefectures = async () => {
+      const prefecturesUrl = `${baseURL}api/v1/prefectures`;
+      const res = await $axios.$get(prefecturesUrl, { headers: headers });
+      data.prefectures = res.result;
+    };
+
+    return { data, getCheckedPopulation };
+  },
+});
 </script>
 
 <style>
-.container {
-  margin: 0 auto;
-  min-height: 100vh;
+.checkbox-container {
+  width: 600px;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+  flex-flow: row wrap;
 }
 
-.title {
-  font-family:
-    'Quicksand',
-    'Source Sans Pro',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
+.checkbox-item {
+  margin: 10px;
 }
 </style>

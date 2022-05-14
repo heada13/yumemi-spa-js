@@ -5,16 +5,45 @@
 </template>
 
 <script type="module">
-import { defineComponent } from "@nuxtjs/composition-api";
+import { defineComponent, reactive, watch } from "@nuxtjs/composition-api";
 
-import Highcharts from "highcharts";
 export default defineComponent({
   name: "Chart",
-  components: {
-    Highcharts,
+  props: {
+    data: { type: Array, default: () => [] },
+    population: { type: String, default: () => "" },
   },
-  setup() {
-    const chartOptions = {
+  setup(props) {
+    watch(
+      () => [props.data, props.population],
+      () => getSeries()
+    );
+
+    const getPopulationType = (data) => {
+      if (props.population === "総人口") {
+        return data.totalPopulation;
+      }
+      if (props.population === "年少人口") {
+        return data.youngPopulation;
+      }
+      if (props.population === "生産年齢人口") {
+        return data.workingAgePopulation;
+      }
+      if (props.population === "老年人口") {
+        return data.elderlyPopulation;
+      }
+    };
+
+    const getSeries = () => {
+      chartOptions.series = props.data.map((d) => {
+        const population = getPopulationType(d);
+        const data = population[0].data.map((v) => v.value);
+        const name = d.prefName;
+        return { name: name, data: data };
+      });
+    };
+
+    const chartOptions = reactive({
       chart: {
         polar: false,
         height: "500px",
@@ -45,31 +74,10 @@ export default defineComponent({
           label: {
             connectorAllowed: false,
           },
-          pointStart: 2010,
+          // pointStart: 2010,
         },
       },
-      series: [
-        {
-          name: "Installation",
-          data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175],
-        },
-        {
-          name: "Manufacturing",
-          data: [24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434],
-        },
-        {
-          name: "Sales & Distribution",
-          data: [11744, 17722, 16005, 19771, 20185, 24377, 32147, 39387],
-        },
-        {
-          name: "Project Development",
-          data: [null, null, 7988, 12169, 15112, 22452, 34400, 34227],
-        },
-        {
-          name: "Other",
-          data: [12908, 5948, 8105, 11248, 8989, 11816, 18274, 18111],
-        },
-      ],
+      series: [],
       responsive: {
         rules: [
           {
@@ -86,7 +94,7 @@ export default defineComponent({
           },
         ],
       },
-    };
+    });
 
     return {
       chartOptions,

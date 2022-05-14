@@ -1,8 +1,17 @@
 <template>
   <div>
-    <!-- {{ data.prefectures }} -->
-    {{ data.population }}
-    <Chart />
+    <!-- {{ radioButton.selected }} -->
+    <Chart :data="data.population" :population="radioButton.selected" />
+    <div class="radio-button">
+      <div v-for="(label, index) in radioButton.label" :key="index">
+        <input
+          type="radio"
+          v-model="radioButton.selected"
+          :value="label"
+          :key="label"
+        /><label>{{ label }}</label>
+      </div>
+    </div>
     <div class="checkbox-container">
       <div
         class="checkbox-item"
@@ -13,7 +22,7 @@
           type="checkbox"
           v-model="data.prefcode"
           :name="pref.prefCode"
-          :value="pref.prefCode"
+          :value="pref"
           @change="getCheckedPopulation"
         />
         <label>{{ pref.prefName }}</label>
@@ -30,6 +39,7 @@ import {
   useContext,
 } from "@nuxtjs/composition-api";
 import Chart from "@/components/Chart.vue";
+import PrefData from "@/model/prefData.js";
 
 export default defineComponent({
   components: {
@@ -42,6 +52,11 @@ export default defineComponent({
 
     // const { $config } = useContext();
     const { $axios, $config } = useContext();
+
+    const radioButton = reactive({
+      label: ["総人口", "年少人口", "生産年齢人口", "老年人口"],
+      selected: "総人口",
+    });
 
     const data = reactive({
       prefectures: [],
@@ -56,12 +71,17 @@ export default defineComponent({
     };
 
     const getCheckedPopulation = () => {
-      let p = data.prefcode;
+      const p = data.prefcode;
       let tmpdata = [];
       for (let i in p) {
-        getPopulation(p[i]).then((result) => {
-          tmpdata.push(result);
-        });
+        getPopulation(p[i].prefCode)
+          .then((result) => {
+            console.log("result", p[i]);
+            tmpdata.push(new PrefData(p[i], result));
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       }
       data.population = tmpdata;
     };
@@ -78,7 +98,7 @@ export default defineComponent({
       data.prefectures = res.result;
     };
 
-    return { data, getCheckedPopulation };
+    return { data, getCheckedPopulation, radioButton };
   },
 });
 </script>
@@ -92,5 +112,10 @@ export default defineComponent({
 
 .checkbox-item {
   margin: 10px;
+}
+
+.radio-button {
+  display: flex;
+  flex-direction: column;
 }
 </style>

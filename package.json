@@ -13,6 +13,7 @@
     "@nuxtjs/composition-api": "^0.32.0",
     "core-js": "^3.9.1",
     "highcharts": "^10.0.0",
-    "nuxt": "^2.15.3"
+    "nuxt": "^2.15.3",
+    "nuxt-highcharts": "^2.0.4"
   }
 }

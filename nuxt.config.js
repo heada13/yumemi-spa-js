@@ -26,7 +26,7 @@ export default {
   buildModules: ["@nuxtjs/composition-api/module"],
 
   // Modules: https://go.nuxtjs.dev/config-modules
-  modules: ["@nuxtjs/axios"],
+  modules: ["@nuxtjs/axios", "nuxt-highcharts"],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},

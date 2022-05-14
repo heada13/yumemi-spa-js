@@ -1,8 +1,8 @@
 <template>
   <div>
-    {{ data.prefectures }}
+    <!-- {{ data.prefectures }} -->
     {{ data.population }}
-    <figure class="highcharts-figure"><div id="container"></div></figure>
+    <Chart />
     <div class="checkbox-container">
       <div
         class="checkbox-item"
@@ -29,8 +29,12 @@ import {
   reactive,
   useContext,
 } from "@nuxtjs/composition-api";
+import Chart from "@/components/Chart.vue";
 
 export default defineComponent({
+  components: {
+    Chart,
+  },
   setup() {
     onMounted(() => {
       getPrefectures();

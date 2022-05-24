@@ -2,14 +2,16 @@
   <div>
     <!-- {{ radioButton.selected }} -->
     <Chart :data="data.population" :population="radioButton.selected" />
-    <div class="radio-button">
+    <div class="radio-button-container">
       <div v-for="(label, index) in radioButton.label" :key="index">
-        <input
-          type="radio"
-          v-model="radioButton.selected"
-          :value="label"
-          :key="label"
-        /><label>{{ label }}</label>
+        <div class="radio-button">
+          <input
+            type="radio"
+            v-model="radioButton.selected"
+            :value="label"
+            :key="label"
+          /><label>{{ label }}</label>
+        </div>
       </div>
     </div>
     <div class="checkbox-container">
@@ -89,6 +91,7 @@ export default defineComponent({
     const getPopulation = async (code) => {
       const populationUrl = `${baseURL}api/v1/population/composition/perYear?cityCode=-&prefCode=${code}`;
       const res = await $axios.$get(populationUrl, { headers: headers });
+      console.log("res", res);
       return res;
     };
 
@@ -114,8 +117,15 @@ export default defineComponent({
   margin: 10px;
 }
 
-.radio-button {
+.radio-button-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  width: fit-content;
+  border-radius: 5px;
+  background-color: rgba(74, 191, 254, 0.591);
+}
+
+.radio-button {
+  margin: 5px 10px;
 }
 </style>
